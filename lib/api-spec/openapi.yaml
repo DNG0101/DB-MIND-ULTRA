@@ -1,0 +1,279 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: DB-MIND ULTRA API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: sessions
+    description: Migration session management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /sessions:
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Create a new migration session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionBody"
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get a migration session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateSession
+      tags: [sessions]
+      summary: Update/save session state
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSessionBody"
+      responses:
+        "200":
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteSession
+      tags: [sessions]
+      summary: Delete a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Session deleted
+
+  /sessions/{id}/export:
+    post:
+      operationId: generateExport
+      tags: [sessions]
+      summary: Generate migration SQL output
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResult"
+        "400":
+          description: Validation errors block export
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    CreateSessionBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Human-readable name for this migration session
+      required:
+        - name
+
+    UpdateSessionBody:
+      type: object
+      properties:
+        name:
+          type: string
+        legacySchema:
+          type: object
+          description: Parsed legacy schema graph (JSON)
+          additionalProperties: true
+        targetSchema:
+          type: object
+          description: Parsed target schema graph (JSON)
+          additionalProperties: true
+        mappingConfig:
+          type: object
+          description: Column and table mapping configuration (JSON)
+          additionalProperties: true
+        validationReport:
+          type: object
+          description: Last validation report (JSON)
+          additionalProperties: true
+        commandHistory:
+          type: array
+          description: Undo/redo command history
+          items:
+            type: object
+            additionalProperties: true
+        status:
+          type: string
+          enum: [new, uploading, parsing, ready, mapped, validated, exported]
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [new, uploading, parsing, ready, mapped, validated, exported]
+        legacySchema:
+          type: object
+          nullable: true
+          additionalProperties: true
+        targetSchema:
+          type: object
+          nullable: true
+          additionalProperties: true
+        mappingConfig:
+          type: object
+          nullable: true
+          additionalProperties: true
+        validationReport:
+          type: object
+          nullable: true
+          additionalProperties: true
+        commandHistory:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - status
+        - commandHistory
+        - createdAt
+        - updatedAt
+
+    ExportResult:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        sql:
+          type: string
+          description: Generated migration SQL
+        rowCount:
+          type: integer
+          description: Total rows to migrate
+        tableCount:
+          type: integer
+          description: Number of tables in output
+        generatedAt:
+          type: string
+          format: date-time
+        warnings:
+          type: array
+          items:
+            type: string
+      required:
+        - sessionId
+        - sql
+        - rowCount
+        - tableCount
+        - generatedAt
+        - warnings
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+      required:
+        - error
