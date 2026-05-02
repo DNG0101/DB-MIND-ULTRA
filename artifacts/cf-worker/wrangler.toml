@@ -1,0 +1,17 @@
+name = "db-mind-ultra"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── D1 Database binding ────────────────────────────────────────────────────
+# After running `wrangler d1 create db-mind-ultra`, paste the database_id here.
+[[d1_databases]]
+binding = "DB"
+database_name = "db-mind-ultra"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# ─── Routes ─────────────────────────────────────────────────────────────────
+# All API traffic goes to this Worker.
+# Your frontend (Cloudflare Pages) proxies /api/* to this Worker automatically.
+[vars]
+ENVIRONMENT = "production"

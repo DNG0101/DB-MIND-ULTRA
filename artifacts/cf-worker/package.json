@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/cf-worker",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrations:apply:local": "wrangler d1 migrations apply db-mind-ultra --local",
+    "migrations:apply:remote": "wrangler d1 migrations apply db-mind-ultra --remote"
+  },
+  "dependencies": {
+    "drizzle-orm": "catalog:",
+    "hono": "^4.7.11",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250525.0",
+    "drizzle-kit": "^0.31.1",
+    "typescript": "^5",
+    "wrangler": "^4.16.0"
+  }
+}
