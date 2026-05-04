@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "db-mind-ultra"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "26a66573-c306-4f46-8693-e3524026fe3a"
 
 # ─── Routes ─────────────────────────────────────────────────────────────────
 # All API traffic goes to this Worker.
