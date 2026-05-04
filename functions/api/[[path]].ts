@@ -1,11 +1,11 @@
-export async function onRequest(context: any) {
+export const onRequest: PagesFunction = async (context) => {
   const { request } = context;
 
   const url = new URL(request.url);
 
-  const API_BASE =
-    "https://db-mind-ultra.donthulanithish53.workers.dev";
+  const API_BASE = "https://db-mind-ultra.donthulanithish53.workers.dev";
 
+  // remove /api prefix
   const path = url.pathname.replace(/^\/api/, "");
 
   const targetUrl = API_BASE + path + url.search;
@@ -23,4 +23,4 @@ export async function onRequest(context: any) {
     status: response.status,
     headers: response.headers,
   });
-}
+};
